@@ -3,6 +3,7 @@ package handler
 import (
 	repository "FirstAPI/Repository/User"
 	types "FirstAPI/Types"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/jackc/pgx/v4"
 )
 
 type UserHandler struct {
@@ -49,7 +51,7 @@ func (U *UserHandler) Login(ctx *fiber.Ctx) error {
 	}
 	user, err := U.UserRepository.Login(loginCred)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.Status(fiber.StatusUnauthorized)
 			return nil
 		}

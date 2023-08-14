@@ -3,11 +3,13 @@ package handler
 import (
 	repository "FirstAPI/Repository/Todo"
 	types "FirstAPI/Types"
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v4"
 )
 
 type TodoHandler struct {
@@ -29,7 +31,7 @@ func (t *TodoHandler) GetTodobyId(ctx *fiber.Ctx) error {
 	}
 	todo, err := t.Repo.GetById(id)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return &fiber.Error{Code: 404, Message: fmt.Sprintf("Todo With Id %d Not Found", id)}
 		}
 		return err
